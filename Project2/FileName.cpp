@@ -8,27 +8,43 @@
 
 using namespace std;
 
-vector<unsigned char> readFile(const string& filename, streamsize& fileSize) {
-    ifstream file(filename, ios::binary);
-    fileSize = filesystem::file_size(filename);
-    vector<unsigned char> buffer(fileSize);
-    file.read(reinterpret_cast<char*>(buffer.data()), fileSize);
-    return buffer;
-}
 
-double calculateEntropy(const vector<unsigned char>& bytes) {
-    map<unsigned char, size_t> byteCounts;
-    for (unsigned char byte : bytes) byteCounts[byte]++;
+int main() {
+    
+    system("chcp 1251");
+
+    string filename = "C:\\Users\\Admin\\Desktop\\Арх03\\Текст03.txt";
+    streamsize fileSize;
+    ifstream file;
+    vector<unsigned char> buffer;
     double entropy = 0.0;
-    for (const auto& count : byteCounts) {
-        double probability = static_cast<double>(count.second) / bytes.size();
-        entropy -= probability * log2(probability);
-    }
-    return entropy;
-}
+    map<unsigned char, size_t> byteCountsQ;
+    //Все переменные.
 
-void printByteFrequencyTable(const map<unsigned char, size_t>& byteCounts) {
-    vector<pair<unsigned char, size_t>> frequencyTable(byteCounts.begin(), byteCounts.end());
+    file.open(filename, ios::binary);
+
+    fileSize = filesystem::file_size(filename);
+
+    buffer.resize(fileSize);
+    file.read(reinterpret_cast<char*>(buffer.data()), fileSize);
+    file.close();
+    
+
+   
+    
+    for (unsigned char byte : buffer) byteCountsQ[byte]++;
+    
+    for (const auto& count : byteCountsQ) {
+    double probability = static_cast<double>(count.second) / fileSize;
+    entropy -= probability * log2(probability);}
+        
+    cout << "Размер файла: " << fileSize << " байт" << endl;
+    cout << "Энтропия файла: " << entropy << " бит/байт" << endl;
+
+
+    cout << "\nТаблица частот байтов:" << endl;
+
+    vector<pair<unsigned char, size_t>> frequencyTable(byteCountsQ.begin(), byteCountsQ.end());
     sort(frequencyTable.begin(), frequencyTable.end(), [](const auto& a, const auto& b) {
         return b.second < a.second;
         });
@@ -36,22 +52,6 @@ void printByteFrequencyTable(const map<unsigned char, size_t>& byteCounts) {
     for (const auto& entry : frequencyTable) {
         cout << static_cast<int>(entry.first) << "\t" << entry.second << endl;
     }
-}
-
-int main() {
-    system("chcp 1251");
-    string filename = "C:\\Users\\Admin\\Desktop\\Арх03\\Текст03.txt";
-
-    streamsize fileSize;
-    vector<unsigned char> fileBytes = readFile(filename, fileSize);
-
-    cout << "Размер файла: " << fileSize << " байт" << endl;
-    cout << "Энтропия файла: " << calculateEntropy(fileBytes) << " бит/байт" << endl;
-
-    map<unsigned char, size_t> byteCounts;
-    for (unsigned char byte : fileBytes) byteCounts[byte]++;
-    cout << "\nТаблица частот байтов:" << endl;
-    printByteFrequencyTable(byteCounts);
 
     return 0;
 }
